@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "./stack.h"
+#include "./queue.h"
 
 Stack* stack_init()
 {
