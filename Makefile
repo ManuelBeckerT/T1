@@ -2,7 +2,7 @@
 #                             Makefile Múltiple                               #
 #                                                                             #
 # Por Vicente Errázuriz                                                       #
-# Para el curso de Estructuras de Datos y Algoritmos, 2018 - 1, PUC           #
+# Para el curso de Estructuras de Datos y Algoritmos, 2017 - 1, PUC           #
 # Makefile diseñada para el trabajo de varios programas con código común      #
 ###############################################################################
 
@@ -12,8 +12,10 @@ CC=gcc -std=gnu11
 SRC=src
 # La carpeta donde van todos los archivos de objeto
 OBJ=obj
+###############################################################################
+# OPTIMIZACIÓN POR COMPILADOR (descomenta el que necesites, comenta el otro)  #
+###############################################################################
 
-# Nivel de optimización del compilador
 OPT=-g # Guardar toda la información para poder debugear. No optimiza
 # OPT=-O3 # Optimiza al máximo, descarta toda la información de debug.
 
@@ -112,3 +114,13 @@ obj/%.o: src/%.c $$(call LOCAL_DEPS,$$@) $(DEPS) Makefile
 ## todos los .o de los directorios comunes
 $(PROGRAMS): $$(filter obj/$$@/% $(foreach i, $(COMMON), obj/$(i)/%), $(OBJFILES))
 	@$(CC) $(CFLAGS) $^ -o $@ $(LIB) && echo "compiled '$@'"
+
+###############################################################################
+#                   Cualquier duda no temas en preguntar!                     #
+###############################################################################
+# Disclaimer:                                                                 #
+#                                                                             #
+# Deberías modificar solamente el nivel de Optimización (OPT, linea 13).      #
+# Modificar la Makefile si no sabes lo que está pasando o como la usamos los  #
+# ayudantes puede resultar en un perjuicio en la evaluación de tu código.     #
+###############################################################################

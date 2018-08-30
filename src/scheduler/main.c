@@ -14,12 +14,20 @@ typedef struct Proceso Proceso;
 
 int main(int argc, char** argv)
 {
-	if (argc != 2)
+
+	int quantum = 3;
+
+	if (argc > 4)
 	{
-		////printf("Modo de uso: ./solver test.txt\n");
+		printf("Modo de uso: ./scheduler input.txt output.csv 5\n");
 		return 0;
 	}
+	else if (argc == 4){
+		quantum = atoi(argv[3]);
+		printf("%i\n", quantum);
+	}
 
+	printf("%i\n", quantum);
 	FILE* input_file = fopen(argv[1], "r");
 
 	/* Falló la apertura del archivo */
