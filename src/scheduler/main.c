@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
-#include "./linkedlist.h"
+#include "./queue.h"
 #include <string.h>
 
 int count_lines(char * archivo){
@@ -31,7 +31,7 @@ void proceso_init(Proceso * proceso){
 	proceso -> response_time = 0;
 	proceso -> turnaround_time = 0;
 	proceso -> waiting_time = 0;
-	proceso -> stage = 0;
+	proceso -> status = 0; // READY
 }
 
 int main(int argc, char** argv)
@@ -57,8 +57,6 @@ int main(int argc, char** argv)
 	int num = count_lines(argv[1]);
 	printf("NUMERO DE LINEAS %i\n", num);
 
-	//Proceso * procesos = malloc(sizeof(Proceso)*num);
-
 	/* Falló la apertura del archivo */
 	if(!input_file)
 	{
@@ -71,47 +69,46 @@ int main(int argc, char** argv)
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t read;
-
 	if (input_file == NULL)
 		exit(EXIT_FAILURE);
 
-	LinkedList * queue = linkedlist_init();
+	Queue * queue_ready = queue_init();
 
 	int position = 0;
 	while ((read = getline(&line, &len, input_file)) != -1){
 		Proceso * proceso = malloc(sizeof(Proceso));
 		proceso -> ID = position;
-		//procesos[position] = *proceso;
-		position ++;
+		position++;
 		proceso_init(proceso);
 
 		printf("\n%s", line);
 		char* token = strtok(line, " ");
 		proceso -> name = token;
-		printf("NAME: %s\n", proceso -> name);
+		//printf("NAME: %s\n", proceso -> name);
 		token = strtok(NULL, " ");
 
 		proceso -> tiempo_llegada = atoi(token);
 		token = strtok(NULL, " ");
-		printf("TIEMPO LLEGADA: %i\n", proceso -> tiempo_llegada);
+		//printf("TIEMPO LLEGADA: %i\n", proceso -> tiempo_llegada);
 		proceso -> num_etapas = atoi(token);
 		token = strtok(NULL, " ");
-		printf("CPU BURST: %i\n", proceso -> num_etapas);
+		//printf("CPU BURST: %i\n", proceso -> num_etapas);
 
 		while (token != NULL){
-			printf("TIEMPOS: %i\n", atoi(token));
+			//printf("TIEMPOS: %i\n", atoi(token));
 			token = strtok(NULL, " ");
 		}
-
-				push_insert(queue, proceso);
+		push_insert(queue_ready, proceso);
 	}
 	free(line);
 
+	printf("SIZE QUEUE READY %i\n", queue_ready -> size);
+
+
+
 	// LIBERAR MEMORIA DESPUES DE LA EJECUCION
-
-	//free(procesos);
-	linkedlist_destroy(queue);
+	printf("\n");
+	queue_destroy(queue_ready);
 	fclose(input_file);
-
 	return 0;
 }

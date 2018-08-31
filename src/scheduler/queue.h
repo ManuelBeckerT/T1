@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+typedef struct Proceso Proceso;
 
 struct Proceso
 {
@@ -8,7 +9,8 @@ struct Proceso
 	char *name;
 	int tiempo_llegada;
 	int num_etapas;
-	int stage; // 0 READY - 1 RUNNING - 2 WAITING - 3 FINISHED
+	int status; // 0 READY - 1 RUNNING - 2 WAITING - 3 FINISHED
+
 	// ESTADISTICAS
 	int CPU_count;
 	int quantum_count;
@@ -18,11 +20,11 @@ struct Proceso
 
 };
 
-typedef struct Proceso Proceso;
-
 struct Nodo
 {
   Proceso * proceso;
+	int time; // time >=1
+	int type; // A es 0 y B es 1
   struct Nodo * next;
   struct Nodo * previous;
 };
@@ -47,4 +49,6 @@ void push(Queue* queue, Proceso *element);
 // Retorna el ultimo elemento del stack
 Proceso * pop(Queue* queue);
 
-void stack_destroy(Queue* Queue);
+void queue_destroy(Queue* Queue);
+
+void push_insert(Queue* queue, Proceso *element);
