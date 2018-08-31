@@ -200,7 +200,7 @@ int main(int argc, char** argv)
 
 	while (queue_finished -> size != num){
 		printf("\n###############################\nQUEUE FINISHED SIZE %i PROCESS COUNT %i\n", queue_finished -> size, num);
-		sleep(1);
+		//sleep(1);
 		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
 			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
 				Proceso * proceso_ready = pop(queue_procesos);
@@ -241,9 +241,12 @@ int main(int argc, char** argv)
 				if (proceso_en_CPU -> num_etapas == 0){
 					printf("[t = %i] El proceso %s ha pasado a estado FINISHED.\n", tiempo_actual, proceso_en_CPU -> name);
 					push(queue_finished, proceso_en_CPU);
+					printf("QUEUE FINISHED SIZE %i\n", queue_finished -> size);
+					//sleep(10);
 					if (queue_ready -> size != 0){
 						proceso_en_CPU = pop(queue_ready);
 						tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
+						proceso_en_CPU -> num_etapas --; //UNA ETAPA MENOS
 					}
 					else{
 						CPU_usada = 0;
@@ -262,6 +265,7 @@ int main(int argc, char** argv)
 					if (queue_ready -> size != 0){
 						proceso_en_CPU = pop(queue_ready);
 						tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
+						proceso_en_CPU -> num_etapas --; //UNA ETAPA MENOS
 					}
 					else{
 						CPU_usada = 0;
