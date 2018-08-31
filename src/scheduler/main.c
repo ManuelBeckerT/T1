@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 		//printf("CPU BURST: %i\n", proceso -> num_etapas);
 		proceso -> time_list = queue_init();
 
-		//push_time(proceso -> time_list, atoi(token));
+		push_time(proceso -> time_list, atoi(token));
 		while (token != NULL){
 			//printf("TIEMPOS: %i\n", atoi(token));
 			push_time(proceso -> time_list, atoi(token));
@@ -117,23 +117,34 @@ int main(int argc, char** argv)
 	//##   SIMULACION DE LOS PROCESOS     ##
 	//######################################
 
+
 	Queue * queue_ready = queue_init();
 	Queue * queue_waiting = queue_init();
 	Queue * queue_finished = queue_init();
 
 	int tiempo_actual = 0;
-	while (queue_finished -> size != num){
+	while (queue_finished -> size != num + 11){
 		printf("SIZE %i - NUM %i - QUANTUM %i\n", queue_finished -> size, num, quantum);
-
+		if (queue_procesos -> size != 0){
+			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){
+				Proceso * proceso_ready = pop(queue_procesos);
+				printf("TIEMPO LLEGADA: %i TIEMPO A_i: %i Proceso ID: %i\n", proceso_ready -> tiempo_llegada, proceso_ready -> time_list -> head -> tiempo, proceso_ready -> ID);
+				push(queue_ready, proceso_ready);
+				sleep(5);
+			}
+		}
+		tiempo_actual ++;
+		num --;
 	}
 
 
 	// LIBERAR MEMORIA DESPUES DE LA EJECUCION
 	printf("\n");
-	queue_destroy(queue_procesos);
+
 	queue_destroy(queue_ready);
 	queue_destroy(queue_waiting);
 	queue_destroy(queue_finished);
+	queue_destroy(queue_procesos);
 	fclose(input_file);
 
 	return 0;

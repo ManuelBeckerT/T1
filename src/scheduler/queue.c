@@ -155,7 +155,7 @@ int pop_time(Queue* queue){
   }
   else{
     Nodo *current = queue -> head -> next;
-    //printf("VALOR DEL TIEMPO %i\n", queue -> head -> tiempo);
+    printf("VALOR DEL TIEMPO %i\n", queue -> head -> tiempo);
     free(queue -> head);
     queue -> head = current;
     queue -> size--;
