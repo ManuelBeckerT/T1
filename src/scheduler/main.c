@@ -28,7 +28,7 @@ int count_lines(char * archivo){
 void proceso_init(Proceso * proceso, char * token){
 	proceso -> CPU_count = 0;
 	proceso -> quantum_count = 0;
-	proceso -> response_time = 0;
+	proceso -> response_time = -1;
 	proceso -> turnaround_time = 0;
 	proceso -> waiting_time = 0;
 	proceso -> status = 0; // READY
@@ -94,10 +94,13 @@ int check_waiting(Queue * waiting_queue, Queue * ready_queue, int tiempo_actual)
 int processing_time(Proceso * pr, int quantum){
 	int tiempo = pr -> time_list -> head -> tiempo;
 	if (tiempo >= quantum){
+		printf("TIEMPO CPU %i - TIEMPO ASIGNADO %i\n", tiempo, quantum);
+		pr -> quantum_count++;
 		pr -> time_list -> head -> tiempo -= quantum;
 		return quantum;
 	}
 	else{
+		printf("TIEMPO CPU %i - TIEMPO ASIGNADO %i\n", tiempo, tiempo);
 		pr -> time_list -> head -> tiempo = 0;
 		return tiempo;
 	}
@@ -193,7 +196,11 @@ int main(int argc, char** argv)
 	int CPU_usada = 0; // 0 FALSE 1 TRUE
 	int tiempo_en_CPU = 0;
 	Proceso * proceso_en_CPU;
-	while (queue_finished -> size != num + 11){
+
+
+	while (queue_finished -> size != num){
+		printf("\n###############################\nQUEUE FINISHED SIZE %i PROCESS COUNT %i\n", queue_finished -> size, num);
+		sleep(1);
 		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
 			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
 				Proceso * proceso_ready = pop(queue_procesos);
@@ -207,14 +214,19 @@ int main(int argc, char** argv)
 		check_waiting(queue_waiting, queue_ready, tiempo_actual); // REVISO COLA WAITING PARA MOVER DE WAITING A READY.
 
 		if (!CPU_usada){ // SI LA CPU ESTA VACIA
+			printf("CPU VACIA\n");
 			if (queue_ready -> size != 0){ // SI HAY PROCESOS EN LA COLA READY
 				proceso_en_CPU = pop(queue_ready); // PROCESO A ENTRAR A LA CPU
-				tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
+				proceso_en_CPU -> num_etapas --; //UNA ETAPA MENOS
 
 				CPU_usada = 1; // ESTA OCUPADA
+				tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
 
 				// ESTADISTICAS
 				proceso_en_CPU -> CPU_count ++;
+				if (proceso_en_CPU -> response_time == -1){
+					proceso_en_CPU -> response_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
+				}
 				printf("[t = %i] El proceso %s ha pasado a estado RUNNING.\n", tiempo_actual, proceso_en_CPU -> name);
 			}
 			else{
@@ -222,14 +234,50 @@ int main(int argc, char** argv)
 			}
 		}
 		else{ // SI LA CPU ESTA OCUPADA
-			if (tiempo_en_CPU == quantum){
-
+			if (tiempo_en_CPU > 0){ // AUN NO SE ACABA SU TIEMPO DE EJECUCION
+				tiempo_en_CPU --;
+			}
+			else{
+				if (proceso_en_CPU -> num_etapas == 0){
+					printf("[t = %i] El proceso %s ha pasado a estado FINISHED.\n", tiempo_actual, proceso_en_CPU -> name);
+					push(queue_finished, proceso_en_CPU);
+					if (queue_ready -> size != 0){
+						proceso_en_CPU = pop(queue_ready);
+						tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
+					}
+					else{
+						CPU_usada = 0;
+					}
+				}
+				else{
+					int tiempo = proceso_en_CPU -> time_list -> head -> tiempo;
+					if (tiempo != 0){
+						printf("[t = %i] El proceso %s ha pasado a estado READY.\n", tiempo_actual, proceso_en_CPU -> name);
+						push(queue_ready, proceso_en_CPU);
+					}
+					else{
+						printf("[t = %i] El proceso %s ha pasado a estado WAITING.\n", tiempo_actual, proceso_en_CPU -> name);
+						push(queue_waiting, proceso_en_CPU);
+					}
+					if (queue_ready -> size != 0){
+						proceso_en_CPU = pop(queue_ready);
+						tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
+					}
+					else{
+						CPU_usada = 0;
+					}
+				}
 			}
 		}
 
+		// CONSIDERAR QUE EL TIEMPO DE WAITING ES TAMBIEN EL TIEMPO QUE PASAN EN LA COLA DE READY
+		// CONSIDERAR QUE EL TIEMPO DE WAITING ES TAMBIEN EL TIEMPO QUE PASAN EN LA COLA DE READY
+		// CONSIDERAR QUE EL TIEMPO DE WAITING ES TAMBIEN EL TIEMPO QUE PASAN EN LA COLA DE READY
+		// CONSIDERAR QUE EL TIEMPO DE WAITING ES TAMBIEN EL TIEMPO QUE PASAN EN LA COLA DE READY
+
+
 		tiempo_actual ++;
-		num --;
-		sleep(1);
+		//sleep(1);
 	}
 
 
