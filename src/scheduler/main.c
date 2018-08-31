@@ -48,7 +48,7 @@ void remove_waiting_queue_to_ready_queue(Queue * waiting_queue, Queue * ready_qu
 	Proceso * pr = pop(waiting_queue); // QUITO AL PROCESO DE LA COLA WAITING ////////////////////////////////////////////////// EEEEEEEEEEERRRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRRRRRR
 	printf("[t = %i] El proceso %s ha pasado a estado READY.\n", tiempo_actual, pr -> name);
 	Queue * time_list = pr -> time_list;
-	pop(time_list); // ELIMINO EL TIEMPO DE EJECUCION DEL PROCESO DE LA LISTA DE TIEMPOS
+	pop_time(time_list); // ELIMINO EL TIEMPO DE EJECUCION DEL PROCESO DE LA LISTA DE TIEMPOS
 	push(ready_queue, pr); // AGREGO EL PROCESO A LA COLA READY
 }
 
@@ -57,47 +57,70 @@ void remove_specific_waiting_queue_to_ready_queue(Queue * waiting_queue, Queue *
 	sleep(10);
 }
 
-int check_waiting(Queue * waiting_queue, Queue * ready_queue, int tiempo_actual){
+void check_waiting(Queue * waiting_queue, Queue * ready_queue, int tiempo_actual){
 	if (waiting_queue -> size != 0){
+		printf("[CHECKING AND UPDATING WAITING QUEUE]\n");
 		Nodo * current = waiting_queue -> head;
-		if (current == waiting_queue -> tail){
-			Proceso * pr = current -> proceso;
-			printf("%s\n", pr -> name);
-			int tiempo = pr -> time_list -> head -> tiempo;
-			printf("%s %i\n", pr -> name, tiempo);
-			sleep(2);
-			if (tiempo == 0){ // SI SE ACABA EL TIEMPO DE WAITING -> PASA A ESTADO READY
-				remove_waiting_queue_to_ready_queue(waiting_queue, ready_queue, tiempo_actual);
+		while (current != waiting_queue -> tail){
+			Proceso * waiting_process = current -> proceso; // PROCESO QUE SE ESTA TRABAJANDO ACTUALMENTE
+			int tiempo = waiting_process -> time_list -> head -> tiempo;
+			printf("IMPORTANTE [%s WAITING FOR %i]\n", waiting_process -> name, tiempo);
+
+			if (current == waiting_queue -> head){ // SI SOY EL PRIMER ELEMENTO DE LA COLA (HEAD)
+				if (tiempo > 1){
+					waiting_process -> time_list -> head -> tiempo --;
+					waiting_process -> waiting_time ++;
+				}
+				else if (tiempo == 1){
+					remove_waiting_queue_to_ready_queue(waiting_queue, ready_queue, tiempo_actual);
+				}
 			}
-			else{
-				reduce_time(current -> proceso);
+			else{ // SI ESTOY EN CUALQUIER POSICION DEL CENTRO DE LA COLA
+				if (tiempo > 1){
+					waiting_process -> time_list -> head -> tiempo --;
+					waiting_process -> waiting_time ++;
+				}
+				else if (tiempo == 1){
+					Nodo * previous = current -> previous;
+					Nodo * next = current -> next;
+					Proceso * current_process = current -> proceso;
+					Queue * time_list = current_process -> time_list;
+					pop_time(time_list);
+					// PUSH DEL PROCESO A COLA READY
+					push(ready_queue, current_process);
+					previous -> next = next;
+					next -> previous = previous;
+					free(current);
+				}
 			}
+			current = current -> next;
 		}
-		else{
-			while (current != waiting_queue -> tail){
-				Proceso * pr = current -> proceso;
-				int tiempo = pr -> time_list -> head -> tiempo;
-				if (tiempo == 0){ // SI SE ACABA EL TIEMPO DE WAITING -> PASA A ESTADO READY
-					remove_specific_waiting_queue_to_ready_queue(waiting_queue, ready_queue, tiempo_actual);
-				}
-				else{
-					reduce_time(current -> proceso);
-				}
-			}
-			Proceso * pr = current -> proceso;
-			int tiempo = pr -> time_list -> head -> tiempo;
-			if (tiempo == 0){ // SI SE ACABA EL TIEMPO DE WAITING -> PASA A ESTADO READY
-				remove_specific_waiting_queue_to_ready_queue(waiting_queue, ready_queue, tiempo_actual);
-			}
-			else{
-				reduce_time(current -> proceso);
-			}
+		// SI SOY EL TAIL NO VOY A HABER ITERADO EN EL WHILE ANTERIOR
+		printf("TRUE FALSE %i\n", current == waiting_queue -> tail);
+		//sleep(1);
+		Proceso * waiting_process = current -> proceso;
+		int tiempo = waiting_process -> time_list -> head -> tiempo;
+		printf("IMPORTANTE [%s WAITING FOR %i]\n", waiting_process -> name, tiempo);
+		if (tiempo > 1){
+			waiting_process -> time_list -> head -> tiempo --;
+			waiting_process -> waiting_time ++;
+		}
+		else if (tiempo == 1){
+			Nodo * previous = current -> previous;
+			Nodo * next = current -> next;
+			Proceso * current_process = current -> proceso;
+			Queue * time_list = current_process -> time_list;
+			pop_time(time_list);
+			// PUSH DEL PROCESO A COLA READY
+			push(ready_queue, current_process);
+			previous -> next = next;
+			next -> previous = previous;
+			free(current);
 		}
 	}
 	else{
-		printf("NO HAY PROCESOS EN ESTADO WAITING\n");
+		printf("[EMPTY WAITING QUEUE]\n");
 	}
-	return 0;
 }
 
 int processing_time(Proceso * pr, int quantum){
@@ -177,7 +200,7 @@ int main(int argc, char** argv)
 		//printf("CPU BURST: %i\n", proceso -> num_etapas);
 		proceso -> time_list = queue_init();
 
-		push_time(proceso -> time_list, atoi(token));
+		//push_time(proceso -> time_list, atoi(token));
 		while (token != NULL){
 			//printf("TIEMPOS: %i\n", atoi(token));
 			push_time(proceso -> time_list, atoi(token));
@@ -188,6 +211,28 @@ int main(int argc, char** argv)
 		push_insert(queue_procesos, proceso);
 	}
 	free(line);
+
+	/*
+	Proceso * p = pop(queue_procesos);
+	Queue * q = p -> time_list;
+	while (q -> size != 0){
+		pop_time(q);
+	}
+
+	printf("\n");
+	p = pop(queue_procesos);
+	q = p -> time_list;
+	while (q -> size != 0){
+		pop_time(q);
+	}
+	printf("\n");
+	p = pop(queue_procesos);
+	q = p -> time_list;
+	while (q -> size != 0){
+		pop_time(q);
+	}
+	sleep(10);
+	***/
 
 	//######################################
 	//##   SIMULACION DE LOS PROCESOS     ##
@@ -297,7 +342,7 @@ int main(int argc, char** argv)
 
 
 		tiempo_actual ++;
-		sleep(5);
+		sleep(2);
 	}
 
 	//// PRINTINT STATISTICS EN CONSOLA
