@@ -247,6 +247,10 @@ int main(int argc, char** argv)
 						proceso_en_CPU = pop(queue_ready);
 						tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
 						proceso_en_CPU -> num_etapas --; //UNA ETAPA MENOS
+						proceso_en_CPU -> CPU_count ++; //UNA ETAPA MENOS
+						if (proceso_en_CPU -> response_time == -1){
+							proceso_en_CPU -> response_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
+						}
 					}
 					else{
 						CPU_usada = 0;
@@ -266,6 +270,10 @@ int main(int argc, char** argv)
 						proceso_en_CPU = pop(queue_ready);
 						tiempo_en_CPU = processing_time(proceso_en_CPU, quantum);
 						proceso_en_CPU -> num_etapas --; //UNA ETAPA MENOS
+						proceso_en_CPU -> CPU_count ++; //UNA ETAPA MENOS
+						if (proceso_en_CPU -> response_time == -1){
+							proceso_en_CPU -> response_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
+						}
 					}
 					else{
 						CPU_usada = 0;
@@ -282,6 +290,13 @@ int main(int argc, char** argv)
 
 		tiempo_actual ++;
 		//sleep(1);
+	}
+
+	//// PRINTINT STATISTICS EN CONSOLA
+	Proceso * process_printing;
+	while (queue_finished -> size != 0){
+		process_printing = pop(queue_finished);
+		printf("%s STATISTICS:\nCPU_count %i\nQUANTUM_count %i\nturnaround_time %i\nresponse_time %i\nwaiting_time %i\n\n", process_printing -> name, process_printing -> CPU_count, process_printing -> quantum_count, process_printing -> turnaround_time, process_printing -> response_time, process_printing -> waiting_time);
 	}
 
 
