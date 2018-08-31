@@ -124,20 +124,38 @@ int main(int argc, char** argv)
 	Queue * queue_finished = queue_init();
 
 	int tiempo_actual = 0;
+	int CPU_usada = 0; // 0 FALSE 1 TRUE
+	int tiempo_en_CPU = 0;
+	Proceso * proceso_en_CPU;
 	while (queue_finished -> size != num + 11){
-		//printf("SIZE %i - NUM %i - QUANTUM %i\n", queue_finished -> size, num, quantum);
-		if (queue_procesos -> size != 0){
-			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){
+		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
+			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
 				Proceso * proceso_ready = pop(queue_procesos);
 				push(queue_ready, proceso_ready);
 				printf("[t = %i] El proceso %s ha sido creado.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
 				proceso_ready -> status = 0; // ESTA EN ESTADO READY
-				sleep(1);
+
 			}
+		}
+		if (!CPU_usada){ // SI LA CPU ESTA VACIA
+			if (queue_ready -> size != 0){ // SI HAY PROCESOS EN LA COLA READY
+				proceso_en_CPU = pop(queue_ready); // PROCESO A ENTRAR A LA CPU
+				proceso_en_CPU -> CPU_count ++;
+				CPU_usada = 1; // ESTA OCUPADA
+
+				printf("[t = %i] El proceso %s ha pasado a estado RUNNING.\n", tiempo_actual, proceso_en_CPU -> name);
+			}
+			else{
+				printf("[t = %i] IDLE\n", tiempo_actual);
+			}
+		}
+		else{ // SI LA CPU ESTA OCUPADA
+
 		}
 
 		tiempo_actual ++;
 		num --;
+		sleep(1);
 	}
 
 
