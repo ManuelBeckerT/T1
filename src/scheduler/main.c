@@ -25,13 +25,15 @@ int count_lines(char * archivo){
 	return count;
 }
 
-void proceso_init(Proceso * proceso){
+void proceso_init(Proceso * proceso, char * token){
 	proceso -> CPU_count = 0;
 	proceso -> quantum_count = 0;
 	proceso -> response_time = 0;
 	proceso -> turnaround_time = 0;
 	proceso -> waiting_time = 0;
 	proceso -> status = 0; // READY
+	proceso -> name = calloc(1, sizeof(token));
+	strcpy(proceso -> name, token);
 }
 
 int main(int argc, char** argv)
@@ -83,11 +85,11 @@ int main(int argc, char** argv)
 		Proceso * proceso = malloc(sizeof(Proceso));
 		proceso -> ID = position;
 		position++;
-		proceso_init(proceso);
+
 
 		printf("%s", line);
 		char* token = strtok(line, " ");
-		proceso -> name = token;
+		proceso_init(proceso, token);
 		//printf("NAME: %s\n", proceso -> name);
 		token = strtok(NULL, " ");
 
@@ -105,8 +107,8 @@ int main(int argc, char** argv)
 			push_time(proceso -> time_list, atoi(token));
 			token = strtok(NULL, " ");
 		}
+
 		print_queue(proceso -> time_list);
-		pop_time(proceso -> time_list);
 		push_insert(queue_procesos, proceso);
 	}
 	free(line);
@@ -117,22 +119,23 @@ int main(int argc, char** argv)
 	//##   SIMULACION DE LOS PROCESOS     ##
 	//######################################
 
-
 	Queue * queue_ready = queue_init();
 	Queue * queue_waiting = queue_init();
 	Queue * queue_finished = queue_init();
 
 	int tiempo_actual = 0;
 	while (queue_finished -> size != num + 11){
-		printf("SIZE %i - NUM %i - QUANTUM %i\n", queue_finished -> size, num, quantum);
+		//printf("SIZE %i - NUM %i - QUANTUM %i\n", queue_finished -> size, num, quantum);
 		if (queue_procesos -> size != 0){
 			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){
 				Proceso * proceso_ready = pop(queue_procesos);
-				printf("TIEMPO LLEGADA: %i TIEMPO A_i: %i Proceso ID: %i\n", proceso_ready -> tiempo_llegada, proceso_ready -> time_list -> head -> tiempo, proceso_ready -> ID);
 				push(queue_ready, proceso_ready);
-				sleep(5);
+				printf("[t = %i] El proceso %s ha sido creado.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
+				proceso_ready -> status = 0; // ESTA EN ESTADO READY
+				sleep(1);
 			}
 		}
+
 		tiempo_actual ++;
 		num --;
 	}

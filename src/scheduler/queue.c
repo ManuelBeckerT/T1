@@ -186,6 +186,7 @@ void queue_destroy(Queue* queue){
     //free(current -> proceso);
     printf("ORDEN %i ID %i\n", current -> proceso -> tiempo_llegada, current -> proceso -> ID);
     queue_destroy_time(current -> proceso -> time_list);
+    free(current -> proceso -> name);
     free(current -> proceso);
     free(current);
     current = next;
