@@ -159,9 +159,10 @@ void sumar_espera_cola_ready(Queue * queue_ready){
 		printf("ANTES %i\n", current -> proceso -> waiting_time);
 		while (count < queue_ready -> size){
 			Proceso * current_proceso = current -> proceso;
-			current -> proceso -> waiting_time ++;			
+			current -> proceso -> waiting_time ++;
 			printf("DENTRO %i\n", current -> proceso -> waiting_time);
 			current = current -> next;
+			count ++;
 		}
 	}
 }
@@ -281,7 +282,7 @@ int main(int argc, char** argv)
 	int tiempo_en_CPU = 0;
 	Proceso * proceso_en_CPU;
 
-	while (queue_finished -> size != num && tiempo_actual < 34){
+	while (queue_finished -> size != num && tiempo_actual < 60){
 		printf("\n###########################################\n###########################################\n[TIEMPO ACTUAL %i] - [FINISHED QUEUE SIZE %i]\n\n", tiempo_actual, queue_finished -> size);
 		printf("[CHECKING NEW PROCESSES]------------------------------------------------\n");
 		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
