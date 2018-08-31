@@ -1,35 +1,34 @@
 #pragma once
 #include <stdint.h>
 
-struct Data
+
+struct Proceso
 {
-	// DIFERENCIADORES
-	uint64_t *ships;
-	uint64_t *asteroids;
-
-	uint64_t asteroid_count;
-
-	// POSICION ULTIMO DISPARO
-	uint64_t row;
-	uint64_t col;
-
-	uint64_t hash;
-
-	struct Data * parent;
+	int ID;
+	char *name;
+	int tiempo_llegada;
+	int num_etapas;
+	int stage; // 0 READY - 1 RUNNING - 2 WAITING - 3 FINISHED
+	// ESTADISTICAS
+	int CPU_count;
+	int quantum_count;
+	int turnaround_time;
+	int response_time;
+	int waiting_time;
 
 };
 
-typedef struct Data Data;
+typedef struct Proceso Proceso;
 
 struct Nodo
 {
-  Data * val;
+  Proceso * proceso;
   struct Nodo * next;
   struct Nodo * previous;
 };
 
 /** Estructura de una lista ligada */
-struct Stack
+struct Queue
 {
   // TODO: Completar esto
   int size;
@@ -38,14 +37,14 @@ struct Stack
 };
 
 typedef struct Nodo Nodo;
-typedef struct Stack Stack;
+typedef struct Queue Queue;
 
-Stack* stack_init();
+Queue* queue_init();
 
 /** Inserta un elemento al final de la lista */
-void push(Stack* stack, Data *element);
+void push(Queue* queue, Proceso *element);
 
 // Retorna el ultimo elemento del stack
-Data * pop(Stack* stack);
+Proceso * pop(Queue* queue);
 
-void stack_destroy(Stack* stack);
+void stack_destroy(Queue* Queue);
