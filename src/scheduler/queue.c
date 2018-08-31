@@ -155,11 +155,14 @@ int pop_time(Queue* queue){
   }
   else{
     Nodo *current = queue -> head -> next;
-    printf("VALOR DEL TIEMPO %i\n", queue -> head -> tiempo);
+    printf("OLD POP TIME %i\n", queue -> head -> tiempo);
     free(queue -> head);
+
     queue -> head = current;
+
+    printf("NEW POP TIME %i\n\n", queue -> head -> tiempo);
     queue -> size--;
-    return 0;
+    return queue -> head -> tiempo;
   }
 }
 
