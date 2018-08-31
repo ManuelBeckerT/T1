@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 	FILE* input_file = fopen(argv[1], "r");
 
 	int num = count_lines(argv[1]);
-	printf("NUMERO DE LINEAS %i\n", num);
+	printf("NUMERO DE LINEAS %i\n\n", num);
 
 	/* Falló la apertura del archivo */
 	if(!input_file)
@@ -63,6 +63,10 @@ int main(int argc, char** argv)
 		printf("¡El archivo %s no existe!\n", argv[1]);
 		return 2;
 	}
+
+	//######################################
+	//###    LECTURA DEL ARCHIVO TXT     ###
+	//######################################
 
 	// Basado en esta página https://rosettacode.org/wiki/Read_a_file_line_by_line
 	// LECTURA INPUT.TXT linea por linea
@@ -72,7 +76,7 @@ int main(int argc, char** argv)
 	if (input_file == NULL)
 		exit(EXIT_FAILURE);
 
-	Queue * queue_ready = queue_init();
+	Queue * queue_procesos = queue_init();
 
 	int position = 0;
 	while ((read = getline(&line, &len, input_file)) != -1){
@@ -81,7 +85,7 @@ int main(int argc, char** argv)
 		position++;
 		proceso_init(proceso);
 
-		printf("\n%s", line);
+		printf("%s", line);
 		char* token = strtok(line, " ");
 		proceso -> name = token;
 		//printf("NAME: %s\n", proceso -> name);
@@ -93,22 +97,44 @@ int main(int argc, char** argv)
 		proceso -> num_etapas = atoi(token);
 		token = strtok(NULL, " ");
 		//printf("CPU BURST: %i\n", proceso -> num_etapas);
+		proceso -> time_list = queue_init();
 
+		//push_time(proceso -> time_list, atoi(token));
 		while (token != NULL){
 			//printf("TIEMPOS: %i\n", atoi(token));
+			push_time(proceso -> time_list, atoi(token));
 			token = strtok(NULL, " ");
 		}
-		push_insert(queue_ready, proceso);
+		print_queue(proceso -> time_list);
+		pop_time(proceso -> time_list);
+		push_insert(queue_procesos, proceso);
 	}
 	free(line);
 
-	printf("SIZE QUEUE READY %i\n", queue_ready -> size);
+	printf("\n\n### SIZE QUEUE PROCESOS %i ###\n\n", queue_procesos -> size);
 
+	//######################################
+	//##   SIMULACION DE LOS PROCESOS     ##
+	//######################################
+
+	Queue * queue_ready = queue_init();
+	Queue * queue_waiting = queue_init();
+	Queue * queue_finished = queue_init();
+
+	int tiempo_actual = 0;
+	while (queue_finished -> size != num){
+		printf("SIZE %i - NUM %i - QUANTUM %i\n", queue_finished -> size, num, quantum);
+
+	}
 
 
 	// LIBERAR MEMORIA DESPUES DE LA EJECUCION
 	printf("\n");
+	queue_destroy(queue_procesos);
 	queue_destroy(queue_ready);
+	queue_destroy(queue_waiting);
+	queue_destroy(queue_finished);
 	fclose(input_file);
+
 	return 0;
 }
