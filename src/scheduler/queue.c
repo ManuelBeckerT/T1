@@ -20,6 +20,78 @@ void print_queue(Queue * queue){
   }
 }
 
+void push_insert_finished(Queue* queue, Proceso *element){
+  Nodo * current;
+  int val = element -> ID;
+  if (queue -> size == 0){
+    current = queue -> head;
+    current -> proceso = element;
+    current -> next = calloc(1, sizeof(Nodo));
+    current -> previous = NULL;
+    queue -> size++;
+    queue -> tail = current;
+  }
+  else if (queue -> size == 1){
+    current = queue -> head;
+    Nodo * new_nodo = calloc(1, sizeof(Nodo));
+    new_nodo -> proceso = element;
+    if (val < current -> proceso -> ID){ // SI EL NUEVO PROCESO EMPIEZA ANTES
+      Nodo * old_head = queue -> head;
+      queue -> head = new_nodo;
+      new_nodo -> previous = NULL;
+      new_nodo -> next = old_head;
+      old_head -> previous = new_nodo;
+      queue -> tail = old_head;
+    }
+    else{ // SIE EL ANTIGUO PROCESO EMPIEZA ANTES O AL MISMO TIEMPO
+      Nodo * old_next = current -> next;
+      queue -> head -> next = new_nodo;
+      new_nodo -> previous = queue -> head;
+      new_nodo -> next = old_next;
+      queue -> tail = new_nodo;
+    }
+    queue -> size++;
+  }
+  else{
+    Nodo * new_nodo = calloc(1, sizeof(Nodo));
+    new_nodo -> proceso = element;
+    current = queue -> tail;
+    while (current -> proceso -> ID > val && current != queue -> head){ // BUSCO HASTA ENCONTRAR UN NODO CON LA VALOR IGUAL O MENOR
+      current = current -> previous;
+    }
+    if (current == queue -> tail){ // SI ME QUEDE EN LA TAIL
+      Nodo * old_next = current -> next;
+      current -> next = new_nodo;
+      new_nodo -> previous = current;
+      new_nodo -> next = old_next;
+      queue -> tail = new_nodo;
+    }
+    else if (current == queue -> head){
+      if (val < current -> proceso -> ID){ // SI EL NUEVO PROCESO EMPIEZA ANTES
+        Nodo * old_head = queue -> head;
+        queue -> head = new_nodo;
+        new_nodo -> previous = NULL;
+        new_nodo -> next = old_head;
+        old_head -> previous = new_nodo;
+      }
+      else{ // SIE EL ANTIGUO PROCESO EMPIEZA ANTES O AL MISMO TIEMPO
+        Nodo * old_next = current -> next;
+        queue -> head -> next = new_nodo;
+        new_nodo -> previous = queue -> head;
+        new_nodo -> next = old_next;
+        queue -> tail = new_nodo;
+      }
+    }
+    else{
+      Nodo * old_next = current -> next;
+      current -> next = new_nodo;
+      new_nodo -> previous = current;
+      new_nodo -> next = old_next;
+    }
+    queue -> size++;
+  }
+}
+
 void push_insert(Queue* queue, Proceso *element){
   Nodo * current;
   int val = element -> tiempo_llegada;
