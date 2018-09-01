@@ -282,10 +282,11 @@ int main(int argc, char** argv)
 	int tiempo_en_CPU = 0;
 	Proceso * proceso_en_CPU;
 
-	while (queue_finished -> size != num && tiempo_actual < 60){
+	while (queue_finished -> size != num && tiempo_actual < 35){
 		printf("\n###########################################\n###########################################\n[TIEMPO ACTUAL %i] - [FINISHED QUEUE SIZE %i]\n\n", tiempo_actual, queue_finished -> size);
-		printf("[CHECKING NEW PROCESSES]------------------------------------------------\n");
 		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
+			printf("[CHECKING NEW PROCESSES]------------------------------------------------\n");
+
 			printf("[PROCESS QUEUE COUNT %i]\n", queue_procesos -> size);
 			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
 				Proceso * proceso_ready = pop(queue_procesos);
@@ -316,7 +317,9 @@ int main(int argc, char** argv)
 
 				CPU_usada = 1;
 				proceso_en_CPU -> CPU_count ++;
+				printf("================> CPU BURSTS %i\n", proceso_en_CPU -> num_etapas);
 				proceso_en_CPU -> num_etapas --;
+				printf("================> CPU BURSTS REMAINING %i\n", proceso_en_CPU -> num_etapas);
 
 				if (proceso_en_CPU -> response_time == -1){
 					proceso_en_CPU -> response_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
@@ -339,9 +342,9 @@ int main(int argc, char** argv)
 			else if (tiempo_en_CPU == 1){
 				int tiempo_restante = proceso_en_CPU -> time_list -> head -> tiempo;
 				if (tiempo_restante == 0){
-					if (proceso_en_CPU -> num_etapas == -1){ // FINISHED PROCESS
+					if (proceso_en_CPU -> num_etapas == 0){ // FINISHED PROCESS
 						push(queue_finished, proceso_en_CPU);
-						pop_time(proceso_en_CPU -> time_list);
+						//pop_time(proceso_en_CPU -> time_list);
 						proceso_en_CPU -> turnaround_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
 						printf("[t = %i] El proceso %s ha pasado a estado FINISHED.\n", tiempo_actual, proceso_en_CPU -> name);
 					}
@@ -349,6 +352,7 @@ int main(int argc, char** argv)
 						printf("[t = %i] El proceso %s ha pasado a estado WAITING.\n", tiempo_actual, proceso_en_CPU -> name);
 						pop_time(proceso_en_CPU -> time_list);
 						push(queue_waiting, proceso_en_CPU);
+						proceso_en_CPU -> waiting_time ++;
 					}
 					if (queue_ready -> size != 0){ // SI ES QUE YA SACAMOS A UNO DE LA CPU, REVISAMOS SI HAY UNO NUEVO PARA INGRESAR
 						proceso_en_CPU = pop(queue_ready);
@@ -403,7 +407,7 @@ int main(int argc, char** argv)
 	Proceso * process_printing;
 	while (queue_finished -> size != 0){
 		process_printing = pop(queue_finished);
-		printf("%s STATISTICS:\nCPU_count %i\nQUANTUM_count %i\nturnaround_time %i\nresponse_time %i\nwaiting_time %i\n\n", process_printing -> name, process_printing -> CPU_count, process_printing -> quantum_count, process_printing -> turnaround_time, process_printing -> response_time, process_printing -> waiting_time);
+		printf("\n\n%s STATISTICS:\nCPU_count %i\nQUANTUM_count %i\nturnaround_time %i\nresponse_time %i\nwaiting_time %i\n\n", process_printing -> name, process_printing -> CPU_count, process_printing -> quantum_count, process_printing -> turnaround_time, process_printing -> response_time, process_printing -> waiting_time);
 	}
 
 
