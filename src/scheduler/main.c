@@ -137,12 +137,12 @@ int processing_time(Proceso * pr, int quantum){
 
 void sumar_espera_cola_ready(Queue * queue_ready){
 	if (queue_ready -> size != 0){
-		printf("ITERANDO \n");
+		//printf("ITERANDO \n");
 		Nodo * current = queue_ready -> head;
 		int count = 0;
 		while (count < queue_ready -> size){
-			printf("COUNT %i SIZE %i\n", count, queue_ready -> size);
-			printf("WAITING %s %i %i\n", current -> proceso -> name, current -> proceso -> waiting_time, current -> proceso -> waiting_time + 1);
+			//printf("COUNT %i SIZE %i\n", count, queue_ready -> size);
+			//printf("WAITING %s %i %i\n", current -> proceso -> name, current -> proceso -> waiting_time, current -> proceso -> waiting_time + 1);
 			current -> proceso -> waiting_time ++;
 			current = current -> next;
 			count ++;
@@ -344,7 +344,7 @@ int main(int argc, char** argv)
 	while (queue_finished -> size != 0){
 		process_printing = pop(queue_finished);
 		fprintf(output_file, "%s,%i,%i,%i,%i,%i\n",process_printing -> name, process_printing -> CPU_count, process_printing -> quantum_count, process_printing -> turnaround_time, process_printing -> response_time, process_printing -> waiting_time);
-		printf("\n\n%s STATISTICS:\nCPU_count %i\nQUANTUM_count %i\nturnaround_time %i\nresponse_time %i\nwaiting_time %i\n\n", process_printing -> name, process_printing -> CPU_count, process_printing -> quantum_count, process_printing -> turnaround_time, process_printing -> response_time, process_printing -> waiting_time);
+		printf("\n\n%s STATISTICS:\nCPU_count %i\nQUANTUM_count %i\nturnaround_time %i\nresponse_time %i\nwaiting_time %i\n", process_printing -> name, process_printing -> CPU_count, process_printing -> quantum_count, process_printing -> turnaround_time, process_printing -> response_time, process_printing -> waiting_time);
 	}
 
 
