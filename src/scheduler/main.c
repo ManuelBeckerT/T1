@@ -36,6 +36,19 @@ void proceso_init(Proceso * proceso, char * token){
 	strcpy(proceso -> name, token);
 }
 
+
+void printing_data(Proceso * pr, int count){
+	if (pr -> ID == 0){
+		printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+		printf("COUNT NUMBER %i\n", count);
+		printf("NAME %s\n", pr -> name);
+		printf("CPU BURST %i\n", pr -> num_etapas);
+		printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
+	}
+
+}
+
+
 void reduce_time(Proceso * proceso){
 	printf("TIEMPO RESTANTE DEL PROCESO %s: %i\n", proceso -> name, proceso -> time_list -> head -> tiempo);
 	proceso -> time_list -> head -> tiempo --;
@@ -59,6 +72,7 @@ void check_waiting(Queue * waiting_queue, Queue * ready_queue, int tiempo_actual
 		Nodo * current = waiting_queue -> head;
 		while (current != waiting_queue -> tail){
 			Proceso * waiting_process = current -> proceso; // PROCESO QUE SE ESTA TRABAJANDO ACTUALMENTE
+			printing_data(waiting_process, 2);
 			int tiempo = waiting_process -> time_list -> head -> tiempo;
 			printf("1. NOMBRE PROCESO EN COLA: %s TIEMPO %i\n", waiting_process -> name, tiempo);
 
@@ -95,7 +109,7 @@ void check_waiting(Queue * waiting_queue, Queue * ready_queue, int tiempo_actual
 			current = current -> next;
 		}
 		Proceso * waiting_process = current -> proceso;
-
+		printing_data(waiting_process, 3);
 		int tiempo = waiting_process -> time_list -> head -> tiempo;
 		// SI SOY EL TAIL NO VOY A HABER ITERADO EN EL WHILE ANTERIOR
 		if (current == waiting_queue -> head){
@@ -282,7 +296,7 @@ int main(int argc, char** argv)
 	int tiempo_en_CPU = 0;
 	Proceso * proceso_en_CPU;
 
-	while (queue_finished -> size != num && tiempo_actual < 35){
+	while (queue_finished -> size != num/* && tiempo_actual < 35*/){
 		printf("\n###########################################\n###########################################\n[TIEMPO ACTUAL %i] - [FINISHED QUEUE SIZE %i]\n\n", tiempo_actual, queue_finished -> size);
 		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
 			printf("[CHECKING NEW PROCESSES]------------------------------------------------\n");
@@ -290,6 +304,7 @@ int main(int argc, char** argv)
 			printf("[PROCESS QUEUE COUNT %i]\n", queue_procesos -> size);
 			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
 				Proceso * proceso_ready = pop(queue_procesos);
+				printing_data(proceso_ready, 1);
 				push(queue_ready, proceso_ready);
 				printf("[t = %i] El proceso %s ha sido creado.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
 				printf("[t = %i] El proceso %s ha pasado a estado READY.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
@@ -312,13 +327,14 @@ int main(int argc, char** argv)
 			printf("========= EMPTY CPU =========\n");
 			if (queue_ready -> size != 0){ // SI HAY PROCESOS EN COLA READY
 				proceso_en_CPU = pop(queue_ready);
+				printing_data(proceso_en_CPU, 4);
 
 				printf("SIGUIENTE PROCESO READY => %s\n", proceso_en_CPU -> name);
 
 				CPU_usada = 1;
 				proceso_en_CPU -> CPU_count ++;
 				printf("================> CPU BURSTS %i\n", proceso_en_CPU -> num_etapas);
-				proceso_en_CPU -> num_etapas --;
+				//proceso_en_CPU -> num_etapas --;
 				printf("================> CPU BURSTS REMAINING %i\n", proceso_en_CPU -> num_etapas);
 
 				if (proceso_en_CPU -> response_time == -1){
@@ -342,22 +358,27 @@ int main(int argc, char** argv)
 			else if (tiempo_en_CPU == 1){
 				int tiempo_restante = proceso_en_CPU -> time_list -> head -> tiempo;
 				if (tiempo_restante == 0){
-					if (proceso_en_CPU -> num_etapas == 0){ // FINISHED PROCESS
+					if (proceso_en_CPU -> num_etapas == 1	){ // FINISHED PROCESS
 						push(queue_finished, proceso_en_CPU);
 						//pop_time(proceso_en_CPU -> time_list);
 						proceso_en_CPU -> turnaround_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
+						proceso_en_CPU -> num_etapas --;
 						printf("[t = %i] El proceso %s ha pasado a estado FINISHED.\n", tiempo_actual, proceso_en_CPU -> name);
+						printing_data(proceso_en_CPU, 5);
 					}
 					else{ // WAITING PROCESS
 						printf("[t = %i] El proceso %s ha pasado a estado WAITING.\n", tiempo_actual, proceso_en_CPU -> name);
 						pop_time(proceso_en_CPU -> time_list);
 						push(queue_waiting, proceso_en_CPU);
+						proceso_en_CPU -> num_etapas --;
 						proceso_en_CPU -> waiting_time ++;
+						printing_data(proceso_en_CPU, 5);
 					}
 					if (queue_ready -> size != 0){ // SI ES QUE YA SACAMOS A UNO DE LA CPU, REVISAMOS SI HAY UNO NUEVO PARA INGRESAR
 						proceso_en_CPU = pop(queue_ready);
 						proceso_en_CPU -> CPU_count ++;
-						proceso_en_CPU -> num_etapas --;
+						printing_data(proceso_en_CPU, 6);
+						//proceso_en_CPU -> num_etapas --;
 						if (proceso_en_CPU -> response_time == -1){
 							proceso_en_CPU -> response_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
 						}
@@ -373,10 +394,15 @@ int main(int argc, char** argv)
 				else{
 					push(queue_ready, proceso_en_CPU);
 					printf("[t = %i] El proceso %s ha pasado a estado READY.\n", tiempo_actual, proceso_en_CPU -> name);
+
+					//proceso_en_CPU -> num_etapas --;
+
+					printing_data(proceso_en_CPU, 7);
 					if (queue_ready -> size != 0){
 						proceso_en_CPU = pop(queue_ready);
 						proceso_en_CPU -> CPU_count ++;
-						proceso_en_CPU -> num_etapas --;
+						printing_data(proceso_en_CPU, 8);
+						//proceso_en_CPU -> num_etapas --;
 						if (proceso_en_CPU -> response_time == -1){
 							proceso_en_CPU -> response_time = tiempo_actual - (proceso_en_CPU -> tiempo_llegada);
 						}
