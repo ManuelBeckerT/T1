@@ -154,15 +154,17 @@ int main(int argc, char** argv)
 {
 
 	int quantum = 3;
-
 	if (argc > 4)
 	{
 		printf("Modo de uso: ./scheduler input.txt output.csv 5\n");
 		return 0;
 	}
+	else if (argc < 3){
+		printf("Ingrese archivos de input.txt y output.csv para correr el programa\n");
+		return 0;
+	}
 	else if (argc == 4){
 		quantum = atoi(argv[3]);
-		printf("%i\n", quantum);
 	}
 
 	printf("QUANTUM: %i\n", quantum);
@@ -243,13 +245,29 @@ int main(int argc, char** argv)
 
 	while (queue_finished -> size != num/* && tiempo_actual < 35*/){
 		if (queue_procesos -> size != 0){ // SI LA COLA DE PROCESOS TIENE ELEMNTOS
-
-			if (queue_procesos -> head -> proceso -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
-				Proceso * proceso_ready = pop(queue_procesos);
-				push(queue_ready, proceso_ready);
-				printf("[t = %i] El proceso %s ha sido creado.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
-				printf("[t = %i] El proceso %s ha pasado a estado READY.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
-				proceso_ready -> status = 0; // ESTA EN ESTADO READY
+			Nodo * current_nodo_in_queue = queue_procesos -> head;
+			int t = 1;
+			while (t){
+				Proceso * current_process_in_queue = current_nodo_in_queue -> proceso;
+				//printf("ID %i SIZE %i\n", current_process_in_queue -> ID, queue_procesos -> size);
+				if (current_process_in_queue -> tiempo_llegada == tiempo_actual){ // SI EL TIEMPO DE LLEGADA ES IGUAL AL TIEMPO ACTUAL
+					if (queue_procesos -> size > 1){
+						//printf("ID %i ID NEXT %i\n", current_process_in_queue -> ID, current_nodo_in_queue -> next -> proceso -> ID);
+						current_nodo_in_queue = current_nodo_in_queue -> next;
+					}
+					else{
+						//printf("LAST ITEM\n");
+						t = 0;
+					}
+					Proceso * proceso_ready = pop(queue_procesos);
+					push(queue_ready, proceso_ready);
+					printf("[t = %i] El proceso %s ha sido creado.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
+					printf("[t = %i] El proceso %s ha pasado a estado READY.\n", proceso_ready -> tiempo_llegada, proceso_ready -> name);
+					proceso_ready -> status = 0; // ESTA EN ESTADO READY
+				}
+				else{
+					t = 0;
+				}
 			}
 		}
 
